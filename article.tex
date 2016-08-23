@@ -1,0 +1,308 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+%\usepackage[english]{babel}
+%\usepackage{csquotes}
+\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsthm}
+%\usepackage{stmaryrd}
+%\usepackage{algorithm}
+\usepackage[vlined,ruled,noend]{algorithm2e}
+\usepackage[backgroundcolor=red]{todonotes}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage[style=alphabetic]{biblatex}
+\addbibresource{citations.bib}
+
+\newcolumntype{L}{>{\centering\arraybackslash}m{3cm}}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows}
+\tikzset{plein/.style={very thick}}
+\tikzset{pointille/.style={thick,dashed}}
+\tikzset{fleche/.style={->, >=open triangle 45}}
+\tikzset{revfleche/.style={<-, >=open triangle 45}}
+\tikzset{arc/.style={->, >=open triangle 45}}
+%%%%%%%%%%%%%%%%%%%%%%%%fin des styles
+
+\newcommand{\BigO}{\mathcal O}
+
+\usepackage[a4paper]{typearea}
+
+
+\newtheorem{Theo}{Theorem}
+\newtheorem{Lemma}{Lemma}
+\newtheorem{Corol}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{Def}{Definition}
+\newcommand{\Qlred}{\leq_{\mathrm{ql}}}
+\newcommand{\Lred}{\leq_{\ell}}
+
+
+\newcommand\True{\textbf{True}{}}
+\newcommand\False{\textbf{False}}
+\newcommand\Prob[1]{\textsc{#1}}%\ref{#1}}
+\newcommand\Nom\textsc
+
+\title{Transitive closure is sub-quadratic in the number of edges}
+\author{Raphaël Gaudy}
+
+\begin{document}
+\maketitle
+
+\abstract{The transitive closure problem is pervasive, but has not
+received any substantial improvement in complexity for decades, barring a 
+recent analysis showing that its complexity is lower than expected.
+We build on this result and shave off a logarithmic factor using only 
+a linear time in the number of vertices.}
+
+
+\section{Introduction}
+
+We begin by a short history of the algorithms. Our algorithm is
+"combinatorial", as it does not depend on infinite precision arithmetic,
+and acts on "sparse" structures, that is on graphs in adjacency list form,
+but we also present algorithms which are  "classic" (using
+infinite precision arithmetic, for instance the fast matrix
+multiplication algorithms) or "dense"
+(such as ones which depend on $\BigO(1)$ read/write such as the 
+Four Russians algorithm).
+
+\paragraph{A classic algorithm} One way to compute the transitive closure if to compute 
+the APSP (all-pairs shortest 
+paths) problem \todo{définir APSP, FW ?, TC <= APSP} for the graph.
+To do this we can use   the classic
+Floyd-Warshall algorithm \cite{Floyd:1962:A9S:367766.368168},
+resulting in a $\BigO(n^3)$ time cost.
+
+\paragraph{Rapid exponentiation}
+If we have access to the adjacency matrix an a matric multiplication algorithm
+in $\BigO(n^\alpha)$ then by using rapid exponentiation we get an algorithm
+running in $\BigO(n^\alpha \log n)$, as we have that 
+$X^+=\sum_{i=1}^n X^i$. The latest improvement on $\alpha$  \cite{DBLP:journals/corr/Gall14}
+ yields
+an algorithm running in $\BigO(n^{2.373}\log n)$ time.
+
+\paragraph{Four Russians}
+???
+$\BigO(n^3/\log^3n)$.
+
+\paragraph{A more tailored approach} We can largely improve that 
+result by using the following algorithm, published first in 1979
+\cite{goralvcikova1979reduct}:
+
+\begin{algorithm}
+  \LinesNumbered
+  \SetAlgoVlined
+  \SetKwInput{Input}{Input} \SetKwInput{Output}{Output}
+  \caption{computing the transitive closure of a graph}
+  \label{transitive_closure_alg}
+  \Input{a directed acyclic graph $G=(V,N)$, stored as a list of
+    out-neighbors $N(v_i)$ for each vertex $v_i\in V$.}
+  \Output{the transitive closure $G'=(V,N')$ of $G$, stored as a list
+    of out-neighbors $N'(v_i)$ for each vertex $v_i \in V$.}
+
+  Find a topological ordering $(v_1,\dots,v_n)$ of $V$\;
+  \For{$i\gets n..1$}{
+  $N'(v_i)\gets N(v_i)$\;
+  \For{$w\in N(v_i)$}{
+  $N'(v_i)\gets N'(v_i) \cup N'(w)$\;
+  }}
+  \textbf{return} $(V, N')$\;
+\end{algorithm}
+This resulted in the following
+\begin{Theo}
+Algorithm \ref{transitive_closure_alg} can be implemented 
+in $\BigO(ns+m)$, where $s$ is the number of edges in the 
+factorgraph (where all the strongly connected components
+are reduced to vertices). For a DAG, this gives an algorithm
+running in $\BigO(nm)$ time.
+\end{Theo}
+
+A new analysis of the algorithm has resulted in the following
+improvement:
+
+\begin{Theo}[\cite{borassi2015into}]
+  It is possible to implement algorithm \ref{transitive_closure_alg} with
+  time complexity $\BigO\left(n+m_{\texttt{tc}}^{3/2}\log n\right)$,
+  where $m_{\texttt{tc}}$ is the number of edges in the transitive closure.
+\end{Theo}
+
+The proof uses the following lemmas:
+\begin{Lemma}
+\label{lemma_deg_tri}
+If $n_{in}(w)$ is the in-degree of $w$ in the transitive closure
+of the graph and $n_{out}(w)$ is the out-degree of $w$ in the
+transitive closure, then $\sum_{w\in V}n_{in}(w)n_{out}(w)$ is
+at most the number of triangles in the transitive closure, seen as
+an undirected graph.
+\end{Lemma}
+
+\begin{Lemma}
+\label{lemma_tri_bound}
+The number of triangles in a graph with $m$ edges is at most $\BigO(m^{3/2})$.
+\end{Lemma}
+\begin{proof}[Proof from \cite{bound_triangles}]
+Define $t(m)$ the maximum number of triangles we can form with
+$m$ edges. For any complete graph, $t(m)=\BigO(m^{1.5})$ ; we have to check this holds when
+${n-1 \choose 2} < m < {n\choose 2}$. Let us define $\delta$ such that
+$m+\delta = {n \choose 2}$ (necessarily $\delta < m$). Then
+\[ t(m) \leq t(m+\delta) = \BigO((m+\delta)^{1.5}) = \BigO((2m)^{1.5}) \]
+because $t$ is non-decreasing.
+\end{proof}
+
+\begin{proof}[Proof sketch]
+Line 1 is done in $\BigO(n+m)$.
+Every other step apart form line 5 can be done in $\BigO(m)$ time.
+The $\log n$ factor comes from line 5 where we insert new
+vertices in a self-balanced binary search tree. Thus Line 5
+costs $\BigO(n_{out}(w)\log n)$. Troughout a run of 
+the algorithm we process a vertex $w$ in the \texttt{for} loop at
+most $n_{in}(w)$ times, making the total cost of
+Line 5 bounded by $\sum_{w\in V}n_{in}(w)n_{out}(w)$. Using lemmas
+\ref{lemma_deg_tri} and \ref{lemma_tri_bound}, the claim follows.
+\end{proof}
+
+One can find an analysis of the algorithm on special cases in 
+\cite{HABIB1993289}\todo{Utile ?}.
+
+\subsection{Shaving off the $\log n$ factor}
+We can actually do a bit better: we use tree data structures
+in algorithm \ref{transitive_closure_alg} to avoid
+inserting twice the same vertex in a list. We can avoid that and
+use an array to keep track of what vertex has been inserted.
+This only costs us a $\BigO(n)$ space
+penalty, which amounts to nothing since we can assume that $n=\BigO(m)$.
+This brings a positive answer to the question asked by
+\cite{borassi2015into}: we can remove the $\log n$ factor. 
+
+\begin{Theo}
+%\label{quick_trans}
+Algorithm \ref{transitive_closure_alg_optim} computes the transitive closure
+of a graph in $\BigO(n+m^{3/2})$ time, with $m$ being the number of edges
+in the transitive closure.
+\end{Theo}
+
+\begin{algorithm}
+  \LinesNumbered
+  \SetAlgoVlined
+  \SetKwInput{Input}{Input} \SetKwInput{Output}{Output}
+  \caption{computing the transitive closure of a graph.}
+  \label{transitive_closure_alg_optim}
+  \Input{a directed acyclic graph $G=(V,N)$, stored as a list of
+    out-neighbors $N(v_i)$ for each vertex $v_i\in V$.}
+  \Output{the transitive closure $G'=(V,N')$ of $G$, stored as a list
+    of out-neighbors $N'(v_i)$ for each vertex $v_i \in V$.}
+
+  Find a topological ordering $(v_1,\dots,v_n)$ of $V$\;
+  Allocate an array $T$ of size $n$ with all cells set to $0$\;
+  \For{$i\gets n..1$}{
+  $N'(v_i)\gets N(v_i)$\;
+  \For{$w\gets N(v_i)$}{
+  	$T[w]\gets 1$\;
+  }
+  \For{$w\in N(v_i)$}{
+  	%\tcc{Formerly $N'(v_i)\gets N'(v_i) \cup N'(w)$}
+  	\For{$x\in N'(w)$}{
+ 	 	\If{$T[x] \neq 1$}{
+ 	 		$T[x] \gets 1$\;
+ 	 		$N'(v_i)\gets N'(v_i) \cup \{x\}$\;
+ 	 	}
+  	}
+  }
+  \For{$w\in N'(v_i)$}{
+        $T[w] \gets 0$\;
+  }
+  }
+  \textbf{return} $(V, N')$\;
+\end{algorithm}
+
+\begin{proof}
+The loops in Line 5 and Line 12 clearly take $\BigO(m)$ time.
+On Line 8, reading and setting a cell in the tab, and then inserting
+a new vertex in a list are all operations done in constant time.
+%On Line 2, if we cannot allocate an array filled with zero in constant
+%time we can use a trick \cite[Exercise 2.12]{aho74} so that an unitialized cell
+%defaults to zero. In that case, allocate $T_1$ and $T_2$ of size $n$, 
+%set $p=0$ and use algorithms \ref{writing_array} and \ref{reading_array}.
+\end{proof}
+
+
+
+%\begin{algorithm}
+%  \label{writing_array}
+%  \LinesNumbered
+%  \SetAlgoVlined
+%  \caption{Writing $x$ in the $i$th cell in $T$}
+
+%  $T[i] \gets x$\;
+%  \If{$T_2[i] > p$ or $T_1[T_2[i]] \neq i$}{
+%  $T_1[p] \gets i$\;
+%  $T_2[i] \gets p$\;
+%  $p \gets p +1$\;
+%  }
+%\end{algorithm}
+%\begin{algorithm}
+%  \label{reading_array}
+%  \LinesNumbered
+%  \SetAlgoVlined
+%  \caption{Reading the $i$th cell in $T$}
+%  \If{$T_2[i] > p$ or $T_1[T_2[i]] \neq i$}{
+%      write value 0 to $T[i]$ using algorithm \ref{writing_array}\;
+%  }
+%  return $T[i]$;
+%\end{algorithm}
+
+
+\begin{Corol}
+It is possible to check that a graph is transitive, and to check
+a graph is a comparability graph, in time $\BigO(m^{3/2})$.
+\end{Corol}
+
+%\section{La fusion de liste et la réduction transitive}
+
+\section{Transitive reduction}
+\begin{Theo}[\cite{aho1972transitive}]
+If there is an algorithm to compute the transitive closure of an $n$ vertex
+graph in time $\BigO(n^\alpha)$, then there is an algorithm to compute 
+the transitive reduction in time $\BigO(n^\alpha)$.
+\end{Theo}
+An important thing to note here is that the authors assume that 
+one can switch from any representation to matrix form in $\BigO(n^2)$ time, 
+which is a lot to ask ; the rest of the algorithm relies on 
+fast multiplication algorithms. Their proof (in the case of DAGs) is as follows.
+\begin{proof}[Proof sketch.]
+If $A$ is the adjacency matrix of the graph, compute its transitive closure
+$A^+$. Then the transitive reduction is $A-AA^+$.
+\end{proof}
+If we wish to adapt this algorithm to the case of sparse matrices, we can try 
+to tweak our algorithm so it sees $A^+$ as a complemented representation (each
+vertex has list of non-neighbors) but there does not seem to be an 
+obvious way to do this (unless we use bit strings as arrays for example).
+For lack of a better alternative, we have
+the following bound:
+\begin{Theo}
+The transitive closure of a graph can be computed in
+$\BigO\left(n^2 + m_{\texttt{tc}}^{3/2}\right)$ time.
+\end{Theo}
+
+This can be compared with the original algorithm of 
+Goral{\v{c}}{\'{i}}kov{\'{a}} and Koubek, which runs 
+in $\BigO\left(nm_{\texttt{tr}} + m_{\texttt{tc}}\right)$, where
+$m_{\texttt{tr}}$ is the nujmber of edges in the transitive reduction.
+
+
+
+
+
+\newpage
+\printbibliography
+\newpage
+
+
+\end{document}

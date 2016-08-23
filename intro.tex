@@ -1,0 +1,93 @@
+
+\section{Introduction}
+It is often said in complexity theory that polynomial-time 
+solvable problems are "easy" and that NP-hard problems are always
+"hard" to solve. However this has been challenged in recent
+years, by the theory of \emph{fine-grained complexity} \cite{borassi2015into,
+vassilevskawilliams:LIPIcs:2015:5568}.
+Indeed, a graph algorithm running in quadratic time on a 
+million-node network may be considered too slow ;
+in the opposite direction, it is still not proved that the $2^n$ bruteforce
+ algorithm
+for SAT is optimal, under the assumption that $P \neq NP$.
+
+\todo[inline]{blablabla}
+
+Our focus will be primarily on boolean matrix multiplication algorithms, and
+other graph-related problems. We try to grasp the notion of \emph{combinatorial}
+algorithm, that is, an algorithm that does not rely on infinite precision
+arithmetic (such as \emph{classic} algorithms for fast matrix 
+multiplication). We also mark a difference between \emph{dense} and 
+\emph{sparse} data on which we run our algorithms: representing a graph
+(or equivalently a boolean matrix) by an adjacency list can be an 
+essential step in making a problem tractable, and thus deserves special
+attention (in particular, these algorithms can often be 
+output-sensitive).
+
+We present our main result
+\begin{Theo}
+\label{quick_trans}
+Algorithm \ref{transitive_closure_alg_optim} computes the transitive closure
+of a graph in $\BigO(n+m^{3/2})$ time, with $m$ being the number of edges
+in the transitive closure.
+\end{Theo}
+To show this we build up on a recent analysis of a classic algorithm for
+computing the 
+transitive closure of a graph, and manage a logarithmic gain in  time while
+ using linear space.
+
+\begin{Def}
+A linear reduction from a problem $\mathcal P$ to a problem
+$\mathcal Q$ is a function $\Phi$ from instances of $\mathcal P$
+to instances of $\mathcal Q$ satisfying, for every instance $I$ of
+$\mathcal P$, the following two properties.
+\begin{itemize}
+\item $\Phi(I)$ can be computed in time $\BigO(s(I))$, where $s(I)$
+is the size of input $I$.
+\item $I$ and $\Phi(I)$ have the same output (if the ouput is not boolean,
+we will also require a linear-time computable function that transforms
+the output of $\Phi(I)$ into the output of $I$).
+\end{itemize}
+If there exists a linear time reduction from $\mathcal P$ to
+$\mathcal Q$, we will write $\mathcal P \Lred \mathcal Q$.
+\end{Def}
+
+
+\begin{Def}
+A quasilinear Karp reduction from a problem $\mathcal P$ to a problem
+$\mathcal Q$ is a function $\Phi$ from instances of $\mathcal P$
+to instances of $\mathcal Q$ satisfying, for every instance $I$ of
+$\mathcal P$, the following two properties.
+\begin{itemize}
+\item $\Phi(I)$ can be computed in time $\tilde\BigO(s(I))$, where $s(I)$
+is the size of input $I$.\footnote{By $\tilde\BigO(f(n))$ we mean 
+$\BigO(f(n)\log^k n)$ for some fixed $k$.}
+\item $I$ and $\Phi(I)$ have the same output (if the ouput is not boolean,
+we will also require a linear-time computable function that transforms
+the output of $\Phi(I)$ into the output of $I$).
+\end{itemize}
+If there exists a quasilinear time reduction from $\mathcal P$ to
+$\mathcal Q$, we will write $\mathcal P \Qlred \mathcal Q$.
+\end{Def}
+
+\subsection{Some problems related to matrix multiplication}
+In \cite{kratsch2006between}, Kratsch and Spinrad establish a series
+of reductions to three problems they consider more fundamental:
+\medskip
+
+\begin{tabular}{|rl|}
+\hline
+\multirow{5}{*}{\Prob{TriangleFree} $\Lred$} 
+%& \multirow{5}{*}{$\Lred$} \\
+& \Prob{ATFreeGraph} \\
+& \Prob{GraphDominatingPair} \\
+& \Prob{DominatingPair} \\
+& \Prob{GraphExtremities} \\
+& \Prob{\#SimplicialVertices} \\ \hline
+\multirow{2}{*}{\Prob{GraphDominatedVertex} $\Lred$}
+%&& \multirow{2}{*}{$\Lred$}
+& \Prob{GraphTwoPair} \\
+& \Prob{GraphStarCutset} \\ \hline
+\Prob{GraphSimplicialVertex} $\Lred$ & 
+\Prob{GraphCliqueCutset} \\ \hline
+\end{tabular}

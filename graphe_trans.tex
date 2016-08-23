@@ -1,0 +1,38 @@
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\node(A1) at (0,0) [shape=circle,draw] {$a_1$};
+\node(Ai) at (1,0) [shape=circle,draw] {$a_i$};
+\node at (2,0) [shape=circle,draw] {};
+\node at (3,0) [shape=circle,draw] {};
+\node(An) at (4,0) [shape=circle,draw] {$a_n$};
+\node(B1) at (0,2) [shape=circle,draw] {$b_1$};
+\node(Bw) at (2,2) [shape=circle,draw] {};
+\node(Bv) at (1,2) [shape=circle,draw] {};
+\node(Bj) at (3,2) [shape=circle,draw] {$b_j$};
+\node(Bn) at (4,2) [shape=circle,draw] {$b_n$};
+\node(C1) at (0,4) [shape=circle,draw] {$c_1$};
+\node at (1,4) [shape=circle,draw] {};
+
+\node at (3,4) [shape=circle,draw] {};
+\node(Ck) at (2, 4) [shape=circle,draw] {$c_k$};
+\node(Cn) at (4, 4) [shape=circle,draw] {$c_n$};
+
+
+\draw[->, >=latex] (A1)--(Bv);
+\draw[->, >=latex] (An)--(Bn);
+\draw[->, >=latex] (Bw)--(C1);
+\draw[->, >=latex] (Bn)--(Cn);
+\draw[->, >=latex] (B1)--(C1);
+\draw[->, >=latex] (Bj)--(Ck);
+\draw[->, >=latex] (Ai)--(Bj);
+%\draw[->, >=latex,plein] (A1) edge[bend left] (C1);
+%\draw[->, >=latex,plein] (A1)  edge[bend right] (Cn);
+\draw[->, >=latex,plein] (An) edge[bend right] (Cn);
+\draw[->, >=latex,plein] (Ai)  edge[] (Ck);
+%\draw[->, >=latex,plein] (An)  edge[bend right] (Cn);
+\end{tikzpicture}
+\caption{Structure of $X^+$, with the edges of the transitive closure in boldface}
+\label{structure_closure}
+\end{figure}
